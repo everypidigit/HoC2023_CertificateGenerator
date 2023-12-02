@@ -99,6 +99,9 @@ if __name__ == "__main__":
             
             # we pass correct certficate path and the correct output path to the function
             # on top of that, we pass the name that we got from the data
-            generate_certificate(certificate_path, output_path, name, participant_email)
+            # generate_certificate(certificate_path, output_path, name, participant_email)
+            
+            # the actual email sending is not done now for testing purposes
+            generate_certificate(certificate_path, output_path, name, "everypidigit@gmail.com")
 
     print("FINISHED THE WHOLE PROCESS")

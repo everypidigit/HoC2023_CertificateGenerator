@@ -2,7 +2,7 @@
 
 A scripy to generate and send participant certificates for Hour of Code 2023.
 
-Simple instruction below, but better contact me @everypidigit 
+Simple instruction below, but better contact me @everypidigit lol.
 
 ### How to use:
 
