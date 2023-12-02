@@ -8,20 +8,9 @@ def generate_certificate(input_image_path, output_image_path, text_to_add):
     draw = ImageDraw.Draw(image)
 
     # Choose a font and size
-    myFont = ImageFont.load_default()
-    myFont = ImageFont(65)
+    myFont = ImageFont.truetype('./freemono/FreeMono.ttf', 65)
     draw.text((1700, 1480), text_to_add, font=myFont, fill=(255, 0, 0))
 
-    # # Choose text color
-    # text_color = (255, 255, 255)  # RGB color tuple (white in this case)
-
-    # # Choose text position
-    # text_position = (1700, 1480)  # (x, y) coordinates
-
-    # # Add text to the image
-    # draw.text(text_position, text_to_add, font=font, fill=text_color)
-
-    # Save the modified image
     image.save(output_image_path)
 
 if __name__ == "__main__":
