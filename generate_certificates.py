@@ -48,14 +48,18 @@ def generate_certificate(input_image_path, output_image_path, text_to_add, email
     # saving the generated image
     initImage.save(output_image_path)
     
+    
+    # NOT SENDING ANYTHING TO EMAILS NOW
+    # GOTTA FINALIZE THE EMAIL BODY TEXT
     # sending the generated image to the correct email address
-    send_email(email_subject, email_body, email_address, output_image_path)
+    # send_email(email_subject, email_body, email_address, output_image_path)
         
 if __name__ == "__main__":
-    DF = pd.read_csv("/Users/daniyarkakimbekov/Workspaces/HoC2023_dataWorks/cleaned_data.csv")
+    DF = pd.read_csv("/Users/daniyarkakimbekov/Workspaces/HoC2023_DataAnalytics/cleaned_data.csv")
+    DF = DF[0:30]
     
-    email_body = "Спасибо!"
-    email_subject = "HoC2023"
+    email_body = "Құрметті дос, Дорогой участник, благодарим тебя за прохождение Часа Кода!/n Твой сертификат прикреплён к данному письму!"
+    email_subject = "Код Сағаты 2023 / Час Кода 2023. Сертификат. "
     
     for i in range(len(DF)):
         # getting data so that we can build paths for certificates
