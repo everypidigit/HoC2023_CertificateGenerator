@@ -94,8 +94,8 @@ if __name__ == "__main__":
             certificate_path = "".join(["./",language, "/",role, ".jpg"])
             
             # building the correct output path and final filename:
-            # final path should look something like this: ./certificates/daniyarkakimbekov.jpg
-            output_path = "".join(["./certificates/",role, "/", name_for_path, ".jpg"])
+            # final path should look something like this: ./certificates/daniyarkakimbekov.jpeg
+            output_path = "".join(["./certificates/",role, "/", name_for_path, ".jpeg"])
             
             # we pass correct certficate path and the correct output path to the function
             # on top of that, we pass the name that we got from the data
