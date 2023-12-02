@@ -24,9 +24,9 @@ def generate_certificate(input_image_path, output_image_path, text_to_add):
 
 if __name__ == "__main__":
     DF = pd.read_csv("/Users/daniyarkakimbekov/Workspaces/HoC2023_dataWorks/cleaned_data.csv")
-    DF = DF[400:410]
+    # DF = DF[400:410]
     
-    for i in range(400, 410):
+    for i in range(len(DF)):
         print(i)
         
         # getting data so that we can build paths for certificates
