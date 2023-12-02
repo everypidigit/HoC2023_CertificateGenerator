@@ -1,10 +1,35 @@
 from PIL import Image, ImageDraw, ImageFont
 import pandas as pd
+import re
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 
-def generate_certificate(input_image_path, output_image_path, text_to_add):
+def send_email(subject, body, to_email, attachment_path):
+    sender_email = "everypidigit@gmail.com"  
+    sender_password = "lili qgkh zlnr apsy"
+    smtp_server = 'smtp.gmail.com'  
+
+    message = MIMEMultipart()
+    message['From'] = sender_email
+    message['To'] = to_email
+    message['Subject'] = subject
+
+    with open(attachment_path, 'rb') as attachment:
+        image = MIMEImage(attachment.read(), _subtype='jpeg', name='HourOfCode2023_certificate.jpg')
+    message.attach(image)
+
+    message.attach(MIMEText(body, 'plain'))
+
+    with smtplib.SMTP_SSL(smtp_server, 465) as server:
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, to_email, message.as_string())
+        server.quit()
+
+def generate_certificate(input_image_path, output_image_path, text_to_add, email_address):
     initImage = Image.open(input_image_path)
     draw = ImageDraw.Draw(initImage)
-
     myFont = ImageFont.truetype('./freemono/FreeMono.ttf', 120)
     
     # the location for printing is chosen as absolute pixels, so gotta make some wraparound so that
@@ -20,15 +45,19 @@ def generate_certificate(input_image_path, output_image_path, text_to_add):
     elif len(text_to_add) > 12:
         draw.text((1850, 1390), text_to_add, font=myFont, fill=(255, 0, 0))
 
+    # saving the generated image
     initImage.save(output_image_path)
-
+    
+    # sending the generated image to the correct email address
+    send_email(email_subject, email_body, email_address, output_image_path)
+        
 if __name__ == "__main__":
     DF = pd.read_csv("/Users/daniyarkakimbekov/Workspaces/HoC2023_dataWorks/cleaned_data.csv")
-    # DF = DF[400:410]
+    
+    email_body = "Спасибо!"
+    email_subject = "HoC2023"
     
     for i in range(len(DF)):
-        print(i)
-        
         # getting data so that we can build paths for certificates
         role = str(DF["role"][i]).replace(" ", "")
         language = str(DF["language"][i]).replace(" ", "")
@@ -40,10 +69,16 @@ if __name__ == "__main__":
         name = ' '.join(capitalized_strings)
     
         # modifying names so that we won't get shitty paths that might interfere with file extensions
-        name_for_path = str(DF["name"][i]).replace(".", " ").replace("/", " ").replace("https://www.", " ").replace(",", " ").replace(" ", "")
+        name_for_path_dirty = str(DF["name"][i])
+        patterns_to_remove = ['https://www.', '/', ',', '&', '^', '%', '$', '#', '.']
+        pattern = '|'.join(re.escape(p) for p in patterns_to_remove)
+        name_for_path = re.sub(pattern, '', name_for_path_dirty)
         
+        # archived for now
+        # name_for_path = str(DF["name"][i]).replace(".", " ").replace("/", " ").replace("https://www.", " ").replace(",", " ").replace(" ", "")
         
-        email = str(DF["email"][i]).replace(" ", "")
+        # taking the email to send the certificate to it
+        participant_email = str(DF["email"][i]).replace(" ", "")
         
         # pass english certificates or teacher/volunteer certificates
         if language == "english" or role == "teacher" or role == "volunteer":
@@ -59,14 +94,11 @@ if __name__ == "__main__":
             certificate_path = "".join(["./",language, "/",role, ".jpg"])
             
             # building the correct output path and final filename:
-            # creating an empty string and then appending to this empty string words
-            # usually, paths look like "./folder/folder/file"
-            # so we take the role and name from the data, append it to ./certificates, and then append .jpg at the end 
-            # final path should look something like this: ./certificates/daniyar.kakimbekov.jpg
+            # final path should look something like this: ./certificates/daniyarkakimbekov.jpg
             output_path = "".join(["./certificates/",role, "/", name_for_path, ".jpg"])
             
             # we pass correct certficate path and the correct output path to the function
             # on top of that, we pass the name that we got from the data
-            generate_certificate(certificate_path, output_path, name)
+            generate_certificate(certificate_path, output_path, name, participant_email)
 
-    print("FINISHED GENERATING CERTIFICATES")
+    print("FINISHED THE WHOLE PROCESS")
