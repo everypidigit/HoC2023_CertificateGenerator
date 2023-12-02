@@ -30,7 +30,7 @@ def send_email(subject, body, to_email, attachment_path):
 def generate_certificate(input_image_path, output_image_path, text_to_add, email_address):
     initImage = Image.open(input_image_path)
     draw = ImageDraw.Draw(initImage)
-    myFont = ImageFont.truetype('./freemono/FreeMono.ttf', 120)
+    myFont = ImageFont.truetype('./font/FreeMono.ttf', 120)
     
     # the location for printing is chosen as absolute pixels, so gotta make some wraparound so that
     # everything's printed beautifully
@@ -38,10 +38,13 @@ def generate_certificate(input_image_path, output_image_path, text_to_add, email
     # shorter names will be printed closer to the absolute center, etc
     if len(text_to_add) < 7:
         draw.text((2200, 1390), text_to_add, font=myFont, fill=(255, 0, 0))
+        
     elif len(text_to_add) > 6 and len(text_to_add) < 10:
         draw.text((2150, 1390), text_to_add, font=myFont, fill=(255, 0, 0))
+        
     elif len(text_to_add) > 9 and len(text_to_add) < 13: 
         draw.text((2050, 1390), text_to_add, font=myFont, fill=(255, 0, 0))
+        
     elif len(text_to_add) > 12:
         draw.text((1850, 1390), text_to_add, font=myFont, fill=(255, 0, 0))
 
@@ -49,7 +52,7 @@ def generate_certificate(input_image_path, output_image_path, text_to_add, email
     initImage.save(output_image_path)
     
     
-    # NOT SENDING ANYTHING TO EMAILS NOW
+    # NOT SENDING ANYTHING TO EMAILS AS OF NOW
     # GOTTA FINALIZE THE EMAIL BODY TEXT
     # sending the generated image to the correct email address
     # send_email(email_subject, email_body, email_address, output_image_path)
@@ -106,6 +109,8 @@ if __name__ == "__main__":
             # generate_certificate(certificate_path, output_path, name, participant_email)
             
             # the actual email sending is not done now for testing purposes
-            generate_certificate(certificate_path, output_path, name, "everypidigit@gmail.com")
+            # we can also implement sending a Kazakh/Russian email based on the registration data.
+            # gotta pass the language data in here, then save it as some variable inside generate_certificate, then pass this variable to the send_email
+            # generate_certificate(certificate_path, output_path, name, "everypidigit@gmail.com")
 
     print("FINISHED THE WHOLE PROCESS")
