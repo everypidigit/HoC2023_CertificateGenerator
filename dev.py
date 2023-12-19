@@ -6,9 +6,9 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 
-def send_email(subject, body, to_email, cert_path, vouch_path):
+def send_email(subject, body, to_email, cert_path, vouch_path, address, student_name):
     message = MIMEMultipart()
-    message['From'] = sender_email
+    message['From'] = address
     message['To'] = to_email
     message['Subject'] = subject
 
@@ -22,14 +22,20 @@ def send_email(subject, body, to_email, cert_path, vouch_path):
     message.attach(MIMEText(body, 'plain'))
 
     try:
-        server.sendmail(sender_email, to_email, message.as_string())
+        server.sendmail(address, to_email, message.as_string())
+        file = open(log_path, 'a')
+        file.write(f"sent email to {to_email} | {student_name}" + '\n')
+        file.close()
+        
     except Exception:
-        bad_emails.append(to_email)
-        print(f"appended {to_email} to bad)emails")
+        file = open(log_path, 'a')
+        file.write(f"bad email {to_email} | {student_name}" + '\n')
+        file.close()
+        
         pass
-    print(f"email sent to {to_email}")
+    
 
-def generate_certificate(input_image_path, voucher_path, output_image_path, output_voucher_path, text_to_add, email_address):
+def generate_certificate(input_image_path, voucher_path, output_image_path, output_voucher_path, text_to_add, email_address, addr):
     initCertificateImage = Image.open(input_image_path)
     drawCertificate = ImageDraw.Draw(initCertificateImage)
     
@@ -68,29 +74,24 @@ def generate_certificate(input_image_path, voucher_path, output_image_path, outp
     initCertificateImage.save(output_image_path)
     initVoucherImage.save(output_voucher_path)
     
-    
-    send_email(email_subject, email_body, email_address, output_image_path, output_voucher_path)
+    send_email(email_subject, email_body, email_address, output_image_path, output_voucher_path, addr, text_to_add)
         
 if __name__ == "__main__":
     DF = pd.read_csv("/Users/daniyarkakimbekov/Workspaces/try/dec5.csv")
     
-    emails = []
-
-    for i in range(1, 51):
-        emails.append(f"hoc2023certificates{i}@hourofcode.kz")
-    
-    limit = 1652
+    limit = 1653    
     
     DF = DF[limit:]
-    smtp_server = 'smtp.gmail.com'
-    sender_email = "daniyar@ustemrobotics.kz"  
-    sender_password = "afos vsor ermk crua"
+
+    user = "hoc2023certificates1@hourofcode.kz"
+    password = "Rapture9949!"
+    smtp_server = "mail.hourofcode.kz"
     
-    global bad_emails
-    bad_emails = []
+    log_path = "./log.txt"
+    
     email_body = """
     
-Дорогой друг тебя приветствует команда Час Кода Казахстан.
+Дорогой друг, тебя приветствует команда Час Кода Казахстан.
 
 С 4 по 10 декабря мы проводим самую масштабную акцию по программированию для учащихся 5 - 11 классов в Казахстане.
 Благодарим тебя за участие и успешное прохождение заданий.
@@ -108,28 +109,30 @@ if __name__ == "__main__":
 Пиши в директ нашей официальной страницы в Instagram - @hourofcode.kz
     
     """
-    email_subject = "Код Сағаты 2023 / Час Кода 2023. Сертификат. "
+    email_subject = "Код Сағаты 2023 / Час Кода 2023. Сертификатw"
+    
     with smtplib.SMTP_SSL(smtp_server, 465) as server:
-        server.login(sender_email, sender_password)
-        for i in range(limit,len(DF)):
-            role = str(DF["role"][i]).replace(" ", "")
-            language = str(DF["language"][i]).replace(" ", "")
+            server.login(user, password)
             
-            name = str(DF["name"][i]).lower().split()
-            capitalized_strings = [s.capitalize() for s in name]
-            name = ' '.join(capitalized_strings)
-        
-            name_for_path_dirty = str(DF["name"][i])
-            patterns_to_remove = ['https://www.', '/', ',', '&', '^', '%', '$', '#', '.']
-            pattern = '|'.join(re.escape(p) for p in patterns_to_remove)
-            name_for_path = re.sub(pattern, '', name_for_path_dirty)
+            for i in range(271,500):
+                index = limit+i
+                role = str(DF["role"][index]).replace(" ", "")
+                language = str(DF["language"][index]).replace(" ", "")
+                
+                if language == "english" or role == "teacher" or role == "volunteer":
+                    pass
+                
+                name = str(DF["name"][index]).lower().split()
+                capitalized_strings = [s.capitalize() for s in name]
+                name = ' '.join(capitalized_strings)
             
-            participant_email = str(DF["email"][i]).replace(" ", "")
-            
-            if language == "english" or role == "teacher" or role == "volunteer":
-                pass
-            
-            else:
+                name_for_path_dirty = str(DF["name"][index])
+                patterns_to_remove = ['https://www.', '/', ',', '&', '^', '%', '$', '#', '.']
+                pattern = '|'.join(re.escape(p) for p in patterns_to_remove)
+                name_for_path = re.sub(pattern, '', name_for_path_dirty)
+                
+                participant_email = str(DF["email"][index]).replace(" ", "")
+                
                 certificate_path = "".join(["./", language, "/", role, ".jpg"])
                 voucher_path = "".join(["./", language, "/voucher.jpg"])
                 
@@ -137,8 +140,6 @@ if __name__ == "__main__":
                 out_voucher_path = "".join(["./certificates/",role, "/", name_for_path, "_Voucher.jpeg"])
                 
                 print(f"starting process for user number {i}")
-                generate_certificate(certificate_path, voucher_path, output_path, out_voucher_path, name, participant_email)
-
+                generate_certificate(certificate_path, voucher_path, output_path, out_voucher_path, name, participant_email, user)
+    
     server.quit()
-    print(bad_emails)
-    print("FINISHED THE WHOLE PROCESS")
