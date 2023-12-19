@@ -94,7 +94,7 @@ if __name__ == "__main__":
     
     global bad_emails
     bad_emails = []
-    
+    ?
     email_body = """
     
     Дорогой друг тебя приветствует команда Час Кода Казахстан.
