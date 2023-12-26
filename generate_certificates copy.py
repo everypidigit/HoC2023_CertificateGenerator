@@ -109,6 +109,7 @@ if __name__ == "__main__":
     
     """
     email_subject = "Код Сағаты 2023 / Час Кода 2023. Сертификат. "
+    
     with smtplib.SMTP_SSL(smtp_server, 465) as server:
         for i in range(123,len(DF)):
             # getting data so that we can build paths for certificates

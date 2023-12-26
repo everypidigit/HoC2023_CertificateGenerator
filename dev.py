@@ -5,8 +5,13 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
+import csv
+from datetime import datetime
 
 def send_email(subject, body, to_email, cert_path, vouch_path, address, student_name):
+    
+    print("entering sending email")
+    
     message = MIMEMultipart()
     message['From'] = address
     message['To'] = to_email
@@ -23,24 +28,46 @@ def send_email(subject, body, to_email, cert_path, vouch_path, address, student_
 
     try:
         server.sendmail(address, to_email, message.as_string())
-        file = open(log_path, 'a')
-        file.write(f"sent email to {to_email} | {student_name}" + '\n')
-        file.close()
+        
+        print("sent email")
+        
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        row = [student_name, to_email, timestamp]
+        
+        with open(good_log_path, 'a', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerow(row)
         
     except Exception:
-        file = open(log_path, 'a')
-        file.write(f"bad email {to_email} | {student_name}" + '\n')
-        file.close()
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        row = [student_name, to_email, timestamp]
+        
+        with open(bad_log_path, 'a', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerow(row)
         
         pass
     
-
 def generate_certificate(input_image_path, voucher_path, output_image_path, output_voucher_path, text_to_add, email_address, addr):
-    initCertificateImage = Image.open(input_image_path)
-    drawCertificate = ImageDraw.Draw(initCertificateImage)
+    print("entering generate certificate")
+    try:
+        initCertificateImage = Image.open(input_image_path)
+        drawCertificate = ImageDraw.Draw(initCertificateImage)
+        print("generated cert")
+        
+    except Exception:
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        row = [input_image_path, email_address, timestamp]
+        
+        with open(bad_log_path, 'a', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerow(row)
+        
+        pass
     
     initVoucherImage = Image.open(voucher_path)
     drawVoucher = ImageDraw.Draw(initVoucherImage)
+    print("generated vouch")
     
     certificateFont = ImageFont.truetype('./font/FreeMono.ttf', 120)
     voucherFont = ImageFont.truetype('./font/FreeMono.ttf', 80)
@@ -71,23 +98,43 @@ def generate_certificate(input_image_path, voucher_path, output_image_path, outp
     new_height = int(original_height * 0.3)    
     initVoucherImage = initVoucherImage.resize((new_width, new_height))
     
-    initCertificateImage.save(output_image_path)
-    initVoucherImage.save(output_voucher_path)
+    try:
+        initCertificateImage.save(output_image_path)
+        initVoucherImage.save(output_voucher_path)
+        
+    except Exception:
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        row = [input_image_path, email_address, timestamp]
+        
+        with open(bad_log_path, 'a', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerow(row)
+        
+        pass
     
     send_email(email_subject, email_body, email_address, output_image_path, output_voucher_path, addr, text_to_add)
         
 if __name__ == "__main__":
-    DF = pd.read_csv("/Users/daniyarkakimbekov/Workspaces/try/dec5.csv")
+    DF = pd.read_csv("./final_full.csv")
     
-    limit = 1653    
+    limit = 7290+500+500+500
     
     DF = DF[limit:]
 
+    smtp_server = "mail.hourofcode.kz"
     user = "hoc2023certificates1@hourofcode.kz"
     password = "Rapture9949!"
-    smtp_server = "mail.hourofcode.kz"
     
-    log_path = "./log.txt"
+    
+    smtp_ustem = 'smtp.gmail.com'
+    user_ustem = "daniyar@ustemrobotics.kz"  
+    password_ustem = "afos vsor ermk crua"
+    
+    # user = "astana.code@gmail.com"
+    # password = "ysrv aetx fiim qddw"
+    
+    bad_log_path = "./bad_email.csv"
+    good_log_path = "./good_email.csv"
     
     email_body = """
     
@@ -109,18 +156,26 @@ if __name__ == "__main__":
 Пиши в директ нашей официальной страницы в Instagram - @hourofcode.kz
     
     """
-    email_subject = "Код Сағаты 2023 / Час Кода 2023. Сертификатw"
+    email_subject = "Код Сағаты 2023 / Час Кода 2023. Сертификат"
     
     with smtplib.SMTP_SSL(smtp_server, 465) as server:
+        
             server.login(user, password)
             
-            for i in range(271,500):
+            for i in range(0,500):
+                
                 index = limit+i
                 role = str(DF["role"][index]).replace(" ", "")
+            
+                if role == "teacher" or role == " teacher" or role == "volunteer":
+                    pass
+                
                 language = str(DF["language"][index]).replace(" ", "")
                 
-                if language == "english" or role == "teacher" or role == "volunteer":
-                    pass
+                
+                
+                if language == "english":
+                    language = "kazakh"
                 
                 name = str(DF["name"][index]).lower().split()
                 capitalized_strings = [s.capitalize() for s in name]
@@ -139,7 +194,9 @@ if __name__ == "__main__":
                 output_path = "".join(["./certificates/",role, "/", name_for_path, ".jpeg"])
                 out_voucher_path = "".join(["./certificates/",role, "/", name_for_path, "_Voucher.jpeg"])
                 
-                print(f"starting process for user number {i}")
+                print(f"starting process for user number {i}, email {participant_email}, name {name}")
                 generate_certificate(certificate_path, voucher_path, output_path, out_voucher_path, name, participant_email, user)
     
-    server.quit()
+
+    print("FINISHED SENDING 500 EMAILS")
+    # server.quit()
