@@ -125,7 +125,7 @@ def generate_certificate(input_image_path, voucher_path, output_image_path, outp
     send_email(email_subject, email_body, email_address, output_image_path, output_voucher_path, addr, text_to_add)
         
 if __name__ == "__main__":
-    DF = pd.read_csv("./data/clean_final.csv")
+    DF = pd.read_csv("/Users/daniyarkakimbekov/Workspaces/HoC2023_DataAnalytics/email.csv")
     bad_log_path = "./bad_email.csv"
     good_log_path = "./good_email.csv"
     
