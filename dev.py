@@ -129,13 +129,13 @@ if __name__ == "__main__":
     bad_log_path = "./bad_email.csv"
     good_log_path = "./good_email.csv"
     
-    limit = 21876
+    limit = 23105
     
     DF = DF[limit:]
     
     # Credentials order: smtp_server, smtp_login, smtp_password
-    credentials = ["mail.hourofcode.kz", "hoc2023certificates1@hourofcode.kz", "Rapture9949!", 
-              "mail.studycs.kz", "hoc2023certificates1@studycs.kz", "Rapture9949!", 
+    credentials = ["mail.hourofcode.kz", "hoc2023certificates1@hourofcode.kz", "absorbantReverer17", 
+              "mail.studycs.kz", "hoc2023certificates1@studycs.kz", "qwerasdzx19!", 
               'smtp.gmail.com', "daniyar@ustemrobotics.kz", "afos vsor ermk crua"]
     
     email_body = """
