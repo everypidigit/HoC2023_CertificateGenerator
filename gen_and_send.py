@@ -18,9 +18,6 @@ def validation_check(email):
         print(f"for email {email} the error is: {str(e)}")
 
 def send_email(subject, body, to_email, cert_path, vouch_path, address, student_name):
-    
-    # test_email = "heethesee@gmail.com"
-    
     message = MIMEMultipart()
     message['From'] = address
     message['To'] = to_email
@@ -38,28 +35,27 @@ def send_email(subject, body, to_email, cert_path, vouch_path, address, student_
     try:
         server.sendmail(address, to_email, message.as_string())
         
+        print("SENT EMAIL")
+        
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         row = [student_name, to_email, timestamp]
         
         with open(good_log_path, 'a', newline='') as csv_file:
             csv_writer = csv.writer(csv_file)
             csv_writer.writerow(row)
-            
-        print("SENT EMAIL")
         
     except Exception as e:
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         row = [student_name, to_email, timestamp]
         
-        with open(bad_log_path, 'a', newline='') as csv_file:
-            csv_writer = csv.writer(csv_file)
-            csv_writer.writerow(row)
-            
-            
         print("                      ")
         print("THE EMAIL WAS NOT SENT")
         print("                      ")
         print({e})
+        
+        with open(bad_log_path, 'a', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerow(row)
     
 def generate_certificate(input_image_path, voucher_path, output_image_path, output_voucher_path, text_to_add, email_address, addr):
     try:
@@ -129,14 +125,24 @@ if __name__ == "__main__":
     bad_log_path = "./bad_email.csv"
     good_log_path = "./good_email.csv"
     
-    limit = 21876
+    limit = 21876+229
     
     DF = DF[limit:]
+
+    smtp_server = "mail.hourofcode.kz"
+    user = "hoc2023certificates1@hourofcode.kz"
+    password = "Rapture9949!"
     
-    # Credentials order: smtp_server, smtp_login, smtp_password
-    credentials = ["mail.hourofcode.kz", "hoc2023certificates1@hourofcode.kz", "Rapture9949!", 
-              "mail.studycs.kz", "hoc2023certificates1@studycs.kz", "Rapture9949!", 
-              'smtp.gmail.com', "daniyar@ustemrobotics.kz", "afos vsor ermk crua"]
+    smtp_study = "mail.studycs.kz"
+    user_study = "hoc2023certificates1@studycs.kz"
+    password_study = "Rapture9949!"
+    
+    smtp_google = 'smtp.gmail.com'
+    user_ustem = "daniyar@ustemrobotics.kz"  
+    password_ustem = "afos vsor ermk crua"
+
+    # user = "astana.code@gmail.com"
+    # password = "ysrv aetx fiim qddw"
     
     email_body = """
     
@@ -162,76 +168,52 @@ if __name__ == "__main__":
     """
     email_subject = "Код Сағаты 2023 / Час Кода 2023. Сертификат"
     
-    for n in range(0,len(credentials), 3):
-        
-        smtp_server = credentials[n]
-        smtp_login = credentials[n+1]
-        smtp_password = credentials[n+2]
-        
-        
-        print("-------------------------------------------------------------------------------------------------------------")
-        print("-------------------------------------------------------------------------------------------------------------")
-        print(f"STARTING EMAILING PROCESS FOR CREDENTIALS: {smtp_server}, {smtp_login}, {smtp_password}")
-        print("-------------------------------------------------------------------------------------------------------------")
-        print("-------------------------------------------------------------------------------------------------------------")
-        
-        with smtplib.SMTP_SSL(smtp_server, 465) as server:
-                server.login(smtp_login, smtp_password)
+    with smtplib.SMTP_SSL(smtp_study, 465) as server:
+            server.login(user_study, password_study)
+            for i in range(0,500):
                 
-                for i in range(0, 500):
-                    
-                    index = limit+i
-                    
-                    name = str(DF["name"][index]).lower().split()
-                    capitalized_strings = [s.capitalize() for s in name]
-                    name = ' '.join(capitalized_strings)
-                    
-                    participant_email = str(DF["email"][index]).replace(" ", "")
-                    
-                    if validation_check(participant_email):
-                        role = str(DF["role"][index]).replace(" ", "")
-                        language = str(DF["language"][index]).replace(" ", "")
-                    
-                        if role == "teacher" or role == " teacher" or role == "volunteer" or role == " volunteer":
-                            pass
-                        
-                        if language == "english":
-                            language = "kazakh"
+                index = limit+i
                 
-                        name_for_path_dirty = str(DF["name"][index])
-                        patterns_to_remove = ['https://www.', '/', ',', '&', '^', '%', '$', '#', '.', '-', '+']
-                        pattern = '|'.join(re.escape(p) for p in patterns_to_remove)
-                        name_for_path = re.sub(pattern, '', name_for_path_dirty)
-                        
-                        certificate_path = "".join(["./templates/", language, "/", role, ".jpg"])
-                        voucher_path = "".join(["./templates/", language, "/voucher.jpg"])
-                        
-                        output_path = "".join(["./certificates/",role, "/", name_for_path, ".jpeg"])
-                        out_voucher_path = "".join(["./certificates/",role, "/", name_for_path, "_Voucher.jpeg"])
-                        
-                        print(f"starting process for user number {i}, email {participant_email}, name {name}")
-                        generate_certificate(certificate_path, voucher_path, output_path, out_voucher_path, name, participant_email, smtp_login)
-                        
-                    else: 
-                        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                        row = [name, participant_email, timestamp]
-                        
-                        with open(bad_log_path, 'a', newline='') as csv_file:
-                            csv_writer = csv.writer(csv_file)
-                            csv_writer.writerow(row)
-
-                server.quit()
+                name = str(DF["name"][index]).lower().split()
+                capitalized_strings = [s.capitalize() for s in name]
+                name = ' '.join(capitalized_strings)
+                
+                participant_email = str(DF["email"][index]).replace(" ", "")
+                
+                if validation_check(participant_email):
+                
+                    role = str(DF["role"][index]).replace(" ", "")
+                    language = str(DF["language"][index]).replace(" ", "")
+                
+                    if role == "teacher" or role == " teacher" or role == "volunteer" or role == " volunteer":
+                        pass
+                    
+                    if language == "english":
+                        language = "kazakh"
             
-            
-        print("-------------------------------------------------------------------------------------------------------------")
-        print("-------------------------------------------------------------------------------------------------------------")
-        print(f"current limit: {limit}")
-        print("-------------------------------------------------------------------------------------------------------------")
-        print("-------------------------------------------------------------------------------------------------------------")
-        limit = limit + 500
-        
+                    name_for_path_dirty = str(DF["name"][index])
+                    patterns_to_remove = ['https://www.', '/', ',', '&', '^', '%', '$', '#', '.', '-', '+']
+                    pattern = '|'.join(re.escape(p) for p in patterns_to_remove)
+                    name_for_path = re.sub(pattern, '', name_for_path_dirty)
+                    
+                    certificate_path = "".join(["./templates/", language, "/", role, ".jpg"])
+                    voucher_path = "".join(["./templates/", language, "/voucher.jpg"])
+                    
+                    output_path = "".join(["./certificates/",role, "/", name_for_path, ".jpeg"])
+                    out_voucher_path = "".join(["./certificates/",role, "/", name_for_path, "_Voucher.jpeg"])
+                    
+                    print(f"starting process for user number {i}, email {participant_email}, name {name}")
+                    generate_certificate(certificate_path, voucher_path, output_path, out_voucher_path, name, participant_email, user_ustem)
+                    
+                else: 
+                    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    row = [name, participant_email, timestamp]
+                    
+                    with open(bad_log_path, 'a', newline='') as csv_file:
+                        csv_writer = csv.writer(csv_file)
+                        csv_writer.writerow(row)
     
 
     print("*********************************************************")
-    print("****************FINISHED SENDING MAIL********************")
+    print("****************FINISHED SENDING EMAILS******************")
     print("*********************************************************")
