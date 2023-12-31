@@ -10,7 +10,6 @@ import smtplib
 import csv
 import sys
 
-
 def validation_check(email):
     try:
         email = validate_email(email)
@@ -18,10 +17,7 @@ def validation_check(email):
     except EmailNotValidError as e:
         print(f"for email {email} the error is: {str(e)}")
 
-def send_email(subject, body, to_email, cert_path, vouch_path, address, student_name):
-    
-    # test_email = "heethesee@gmail.com"
-    
+def send_email(subject, body, to_email, cert_path, address, student_name):
     message = MIMEMultipart()
     message['From'] = address
     message['To'] = to_email
@@ -29,11 +25,7 @@ def send_email(subject, body, to_email, cert_path, vouch_path, address, student_
 
     with open(cert_path, 'rb') as attachment:
         certificate = MIMEImage(attachment.read(), _subtype='jpeg', name='HourOfCode2023_certificate.jpg')
-    with open(vouch_path, 'rb') as attachment:
-        voucher = MIMEImage(attachment.read(), _subtype='jpeg', name='Voucher.jpg')
     message.attach(certificate)
-    message.attach(voucher)
-
     message.attach(MIMEText(body, 'plain'))
 
     try:
@@ -62,7 +54,7 @@ def send_email(subject, body, to_email, cert_path, vouch_path, address, student_
         print("                      ")
         print({e})
     
-def generate_certificate(input_image_path, voucher_path, output_image_path, output_voucher_path, text_to_add, email_address, addr):
+def generate_certificate(input_image_path, output_image_path, name, email_address, addr, index):
     try:
         initCertificateImage = Image.open(input_image_path)
         drawCertificate = ImageDraw.Draw(initCertificateImage)
@@ -77,41 +69,57 @@ def generate_certificate(input_image_path, voucher_path, output_image_path, outp
         
         pass
     
-    initVoucherImage = Image.open(voucher_path)
-    drawVoucher = ImageDraw.Draw(initVoucherImage)
+    index = index + 1
+    index = str(index)
     
-    certificateFont = ImageFont.truetype('./font/FreeMono.ttf', 120)
-    voucherFont = ImageFont.truetype('./font/FreeMono.ttf', 80)
+    index_str = f"HoC-2023-0000{index}"  
     
-    if len(text_to_add) < 7:
-        drawCertificate.text((2200, 1390), text_to_add, font=certificateFont, fill=(255, 0, 0))
-        drawVoucher.text((430, 1320), text_to_add, font=voucherFont, fill=(0, 0, 0))
+    if int(index) >= 10 and int(index) < 100:
+        index_str = f"HoC-2023-000{index}"  
+    elif int(index) >= 100 and int(index) < 1000:
+        index_str = f"HoC-2023-00{index}"
+    elif int(index) >= 1000:
+        index_str = f"HoC-2023-0{index}"
+    
+    certificateFont = ImageFont.truetype('./font/FreeMono.ttf', 80)
+    longCertificateFont = ImageFont.truetype('./font/FreeMono.ttf', 25)
+    intermediateCertificateFont = ImageFont.truetype('./font/FreeMono.ttf', 70)
+    indexFont = ImageFont.truetype('./font/FreeMono.ttf', 80)
+    
+    if len(name) < 7:
+        drawCertificate.text((2200, 1420), name, font=certificateFont, fill=(255, 0, 0))
+        drawCertificate.text((2750, 2350), index_str, font=indexFont, fill=(255, 0, 0))
         
-    elif len(text_to_add) > 6 and len(text_to_add) < 10:
-        drawCertificate.text((2150, 1390), text_to_add, font=certificateFont, fill=(255, 0, 0))
-        drawVoucher.text((380, 1320), text_to_add, font=voucherFont, fill=(0, 0, 0))
+    elif len(name) > 6 and len(name) < 10:
+        drawCertificate.text((2150, 1420), name, font=certificateFont, fill=(255, 0, 0))
+        drawCertificate.text((2750, 2350), index_str, font=indexFont, fill=(255, 0, 0))
+ 
+    elif len(name) > 9 and len(name) < 13: 
+        drawCertificate.text((2050, 1420), name, font=certificateFont, fill=(255, 0, 0))
+        drawCertificate.text((2750, 2350), index_str, font=indexFont, fill=(255, 0, 0))
         
-    elif len(text_to_add) > 9 and len(text_to_add) < 13: 
-        drawCertificate.text((2050, 1390), text_to_add, font=certificateFont, fill=(255, 0, 0))
-        drawVoucher.text((300, 1320), text_to_add, font=voucherFont, fill=(0, 0, 0))
+    elif len(name) > 12 and len(name) < 20:
+        drawCertificate.text((1870, 1420), name, font=certificateFont, fill=(255, 0, 0))
+        drawCertificate.text((2750, 2350), index_str, font=indexFont, fill=(255, 0, 0))
         
-    elif len(text_to_add) > 12:
-        drawCertificate.text((1850, 1390), text_to_add, font=certificateFont, fill=(255, 0, 0))
-        drawVoucher.text((220, 1320), text_to_add, font=voucherFont, fill=(0, 0, 0))
+    elif len(name) >= 20 and len(name) < 26:
+        drawCertificate.text((1800, 1420), name, font=certificateFont, fill=(255, 0, 0))
+        drawCertificate.text((2750, 2350), index_str, font=indexFont, fill=(255, 0, 0))
+        
+    elif len(name) >= 26 and len(name) < 33:
+        drawCertificate.text((1740, 1420), name, font=certificateFont, fill=(255, 0, 0))
+        drawCertificate.text((2750, 2350), index_str, font=indexFont, fill=(255, 0, 0))
+        
+    elif len(name) >= 33 and len(name) < 40:
+        drawCertificate.text((1660, 1420), name, font=intermediateCertificateFont, fill=(255, 0, 0))
+        drawCertificate.text((2750, 2350), index_str, font=indexFont, fill=(255, 0, 0))
 
-    original_width, original_height = initCertificateImage.size
-    new_width = int(original_width * 0.3)
-    new_height = int(original_height * 0.3)    
-    initCertificateImage = initCertificateImage.resize((new_width, new_height))
-    
-    original_width, original_height = initVoucherImage.size
-    new_width = int(original_width * 0.3)
-    new_height = int(original_height * 0.3)    
-    initVoucherImage = initVoucherImage.resize((new_width, new_height))
-    
+    elif len(name) >= 40:
+        drawCertificate.text((1590, 1465), name, font=longCertificateFont, fill=(255, 0, 0))
+        drawCertificate.text((2750, 2350), index_str, font=indexFont, fill=(255, 0, 0))
+
     try:
         initCertificateImage.save(output_image_path)
-        initVoucherImage.save(output_voucher_path)
         
     except Exception:
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -123,32 +131,32 @@ def generate_certificate(input_image_path, voucher_path, output_image_path, outp
         
         pass
     
-    send_email(email_subject, email_body, email_address, output_image_path, output_voucher_path, addr, text_to_add)
-        
+    send_email(email_subject, email_body, email_address, output_image_path, addr, name)
+
 if __name__ == "__main__":
-    DF = pd.read_csv("/Users/daniyarkakimbekov/Workspaces/HoC2023_DataAnalytics/email.csv")
-    bad_log_path = "./bad_email.csv"
-    good_log_path = "./good_email.csv"
+    DF = pd.read_excel("/Users/daniyarkakimbekov/Workspaces/HoC2023_DataAnalytics/teachers.xlsx")
+    bad_log_path = "/Users/daniyarkakimbekov/Workspaces/HoC2023_CertificateGenerator/bad_teacher_emails.csv"
+    good_log_path = "/Users/daniyarkakimbekov/Workspaces/HoC2023_CertificateGenerator/good_teacher_emails.csv"
     
-    limit = 26105+493+1078+1318+294
+    limit = 594
     
     DF = DF[limit:]
     
     # Credentials order: smtp_server, smtp_login, smtp_password
     credentials = [
                     "mail.hourofcode.kz", "hoc2023certificates1@hourofcode.kz", "absorbantReverer17", 
-                    "mail.studycs.kz", "hoc2023certificates1@studycs.kz", "qwerasdzx19!", 
+                    "mail.studycs.kz", "hoc2023certificates1@studycs.kz", "qwerasdzx19!",
+                    # "smtp.gmail.com", "daniyar@ustemrobotics.kz", "afos vsor ermk crua",
                     "smtp.yandex.ru", "Olympics@steptoenglish.org", "Step4ever!"
-                    "smtp.gmail.com", "daniyar@ustemrobotics.kz", "afos vsor ermk crua",
                    ]
     
     email_body = """
     
-Дорогой друг, тебя приветствует команда Час Кода Казахстан.
+Дорогой учитель, вас приветствует команда Час Кода Казахстан!
 
-С 4 по 10 декабря мы проводим самую масштабную акцию по программированию для учащихся 5 - 11 классов в Казахстане.
-Благодарим тебя за участие и успешное прохождение заданий.
-В качестве подтверждения отправляем официальный именной сертификат участника, а также в знак нашей признательности вручаем тебе лимитированный ваучер на обучение в школе английского Step.
+С 4 по 10 декабря мы проводили самую масштабную акцию по программированию для учащихся 5 - 11 классов в Казахстане.
+Благодарим вас за ваш вклад в нашу общую цель!
+В качестве подтверждения отправляем официальный именной сертификат учителя.
 
 Организаторы акции:
 ✅ USTEM Foundation. https://firstrobotics.kz/first-kaz
@@ -164,7 +172,7 @@ if __name__ == "__main__":
 Бұл электрондық пошта автоматты түрде жасалды. Жауап бермеңіз.
 Это письмо было сгенерировано автоматически. Пожалуйста, не отвечайте на него.
     """
-    email_subject = "Код Сағаты 2023 / Час Кода 2023. Сертификат"
+    email_subject = "Код Сағаты 2023 / Час Кода 2023. Сертификат учителя."
     
     for n in range(0,len(credentials), 3):
         
@@ -194,28 +202,19 @@ if __name__ == "__main__":
                     participant_email = str(DF["email"][index]).replace(" ", "")
                     
                     if validation_check(participant_email):
-                        role = str(DF["role"][index]).replace(" ", "")
-                        language = str(DF["language"][index]).replace(" ", "")
-                    
-                        if role == "teacher" or role == " teacher" or role == "volunteer" or role == " volunteer":
-                            pass
-                        
-                        if language == "english":
-                            language = "kazakh"
+                        language = "kazakh"
                 
                         name_for_path_dirty = str(DF["name"][index])
                         patterns_to_remove = ['https://www.', '/', ',', '&', '^', '%', '$', '#', '.', '-', '+', ' ']
                         pattern = '|'.join(re.escape(p) for p in patterns_to_remove)
                         name_for_path = re.sub(pattern, '', name_for_path_dirty)
                         
-                        certificate_path = "".join(["./templates/", language, "/", role, ".jpg"])
-                        voucher_path = "".join(["./templates/", language, "/voucher.jpg"])
+                        certificate_path = "".join(["./templates/kazakh/teacher.jpg"])
                         
-                        output_path = "".join(["./certificates/",role, "/", name_for_path, ".jpeg"])
-                        out_voucher_path = "".join(["./certificates/",role, "/", name_for_path, "_Voucher.jpeg"])
+                        output_path = "".join(["./certificates/teacher/", name_for_path, ".jpeg"])
                         
                         print(f"starting process for user number {i}, email {participant_email}, name {name}")
-                        generate_certificate(certificate_path, voucher_path, output_path, out_voucher_path, name, participant_email, smtp_login)
+                        generate_certificate(certificate_path, output_path, name, participant_email, smtp_login, index)
                         
                     else: 
                         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
